@@ -6,7 +6,7 @@ var request = require('request');
 var url = require('url');
 var ProgressBar = require('progress');
 var fs = require('fs');
-var admZip = require('adm-zip');
+var AdmZip = require('adm-zip');
 var winston = require('winston');
 var exec = require('child_process').exec;
 
@@ -65,7 +65,7 @@ module.exports = yeoman.generators.Base.extend({
         }
         bar.tick(bar.total - bar.curr);
         winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
-        var zip = new admZip(zipDestination);
+        var zip = new AdmZip(zipDestination);
         zip.extractAllTo(extractDestination);
         fs.unlink(zipDestination, function (err) {
           if (err) {
