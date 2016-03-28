@@ -7,6 +7,9 @@ var url = require('url');
 var progressBar = require('progress');
 var fs = require('fs');
 var admZip = require('adm-zip');
+var winston = require('winston');
+var path = require('path');
+var exec = require('child_process').exec;
 
 module.exports = yeoman.generators.Base.extend({
   prompting: function () {
@@ -14,7 +17,7 @@ module.exports = yeoman.generators.Base.extend({
 
     // Have Yeoman greet the user.
     this.log(yosay(
-      'Welcome to the fantastic ' + chalk.red('generator-prestashop') + ' generator!'
+      'Welcome to the fantastic ' + chalk.red('PrestaShop') + ' generator!'
     ));
 
     var prompts = [{
@@ -33,12 +36,18 @@ module.exports = yeoman.generators.Base.extend({
   },
 
   writing: function () {
+    winston.level = 'info';
     if (this.props.latestStableVersion) {
-      var targetUrl = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
-      var targetName = url.parse(targetUrl).pathname.split('/').pop();
-      var req = request(targetUrl);
+      var zipUrl = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
+      // prestashop_1.6.1.4.zip
+      var zipName = url.parse(zipUrl).pathname.split('/').pop();
+      var req = request(zipUrl);
       var bar;
-      var targetDestination = this.destinationPath(targetName);
+      // path/to/destination/tmp
+      var zipDestination = this.destinationPath('tmp');
+      // path/to/destination/prestashop_1.6.1.4
+      var extractDestination = this.destinationPath('presta');
+      var finalName = this.destinationPath(zipName).slice(0, -4);
       req
       .on('data', function (chunk) {
         bar = bar || new progressBar('Downloading... [:bar] :percent :etas', {
@@ -50,13 +59,40 @@ module.exports = yeoman.generators.Base.extend({
 
         bar.tick(chunk.length);
       })
-      .pipe(fs.createWriteStream(targetDestination))
+      .pipe(fs.createWriteStream(zipDestination))
       .on('close', function (err) {
         bar.tick(bar.total - bar.curr);
-        console.log('Extracting the archive...');
-        var zip = new admZip(targetDestination);
-        zip.extractAllTo(targetDestination.slice(0, -4));
+        winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
+        var zip = new admZip(zipDestination);
+        zip.extractAllTo(extractDestination);
+        fs.unlink(zipDestination, function (err) {
+          if (err) {
+            winston.log('error', err.toString());
+          } else {
+          }
+        });
+        winston.log('info', 'Cleanup everything...');
+        fs.rename(extractDestination + '/prestashop', finalName, function (err) {
+          if (err) {
+            winston.log('error', err.toString());
+          } else {
+            exec('rm -r ' + extractDestination, function (err, stdout, stderr) {
+              if (err) {
+                winston.log('error', err.toString());
+              } else if (stdout) {
+                winston.log('error', stdout.toString());
+              } else if (stderr) {
+                winston.log('error', stderr.toString());
+              } else {
+                winston.log('info', '...done.');
+                console.log(chalk.green('A new PrestaShop store is born!'));
+              }
+            });
+          }
+        });
       });
+    } else {
+      console.log(chalk.red('Sorry dude, I\'m not able to fetch old PrestaShop version yet'));
     }
   },
 
