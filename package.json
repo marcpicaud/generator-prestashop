@@ -17,23 +17,27 @@
     "prestashop"
   ],
   "dependencies": {
-    "yeoman-generator": "^0.22.5",
+    "adm-zip": "^0.4.7",
     "chalk": "^1.0.0",
+    "progress": "^1.1.8",
+    "request": "^2.69.0",
+    "yeoman-generator": "^0.22.5",
     "yosay": "^1.0.2"
   },
   "devDependencies": {
-    "yeoman-assert": "^2.0.0",
     "eslint": "^2.1.0",
     "eslint-config-xo-space": "^0.11.0",
     "gulp": "^3.9.0",
+    "gulp-coveralls": "^0.1.0",
     "gulp-eslint": "^2.0.0",
     "gulp-exclude-gitignore": "^1.0.0",
-    "gulp-line-ending-corrector": "^1.0.1",
     "gulp-istanbul": "^0.10.3",
+    "gulp-line-ending-corrector": "^1.0.1",
     "gulp-mocha": "^2.0.0",
-    "gulp-plumber": "^1.0.0",
     "gulp-nsp": "^2.1.0",
-    "gulp-coveralls": "^0.1.0"
+    "gulp-plumber": "^1.0.0",
+    "winston": "^2.2.0",
+    "yeoman-assert": "^2.0.0"
   },
   "eslintConfig": {
     "extends": "xo-space",
