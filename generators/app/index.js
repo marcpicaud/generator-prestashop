@@ -2,8 +2,9 @@
 var yeoman = require('yeoman-generator');
 var chalk = require('chalk');
 var yosay = require('yosay');
-var http = require('http');
+var request = require('request');
 var url = require('url');
+var progressBar = require('progress');
 var fs = require('fs');
 
 module.exports = yeoman.generators.Base.extend({
@@ -32,30 +33,26 @@ module.exports = yeoman.generators.Base.extend({
 
   writing: function () {
     if (this.props.latestStableVersion) {
-      var file_url = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
-      var options = {
-        host: url.parse(file_url).host,
-        port: 80,
-        path: url.parse(file_url).pathname
-      };
-
-      var file_name = url.parse(file_url).pathname.split('/').pop();
-      var file = fs.createWriteStream(this.destinationPath(file_name));
-
-      http.get(options, function (res) {
-        res.on('data', function(data) {
-          file.write(data);
-        }).on('end', function () {
-          file.end();
-          console.log(yosay('A new PrestaShop store is born!'));
+      var target_url = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
+      var filename = url.parse(target_url).pathname.split('/').pop();
+      var req = request(target_url);
+      var bar;
+      req
+      .on('data', function (chunk) {
+        bar = bar || new progressBar('Downloading... [:bar] :percent :etas', {
+          complete: '=',
+          incomplete: ' ',
+          width: 25,
+          total: parseInt(req.response.headers['content-length'])
         });
-      });
 
+        bar.tick(chunk.length);
+      })
+      .pipe(fs.createWriteStream(this.destinationPath(filename)))
+      .on('close', function (err) {
+        bar.tick(bar.total - bar.curr);
+      });
     }
-    // this.fs.copy(
-    //   this.templatePath('dummyfile.txt'),
-    //   this.destinationPath('dummyfile.txt')
-    // );
   },
 
   install: function () {
