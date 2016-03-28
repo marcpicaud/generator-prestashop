@@ -6,6 +6,7 @@ var request = require('request');
 var url = require('url');
 var progressBar = require('progress');
 var fs = require('fs');
+var admZip = require('adm-zip');
 
 module.exports = yeoman.generators.Base.extend({
   prompting: function () {
@@ -33,24 +34,28 @@ module.exports = yeoman.generators.Base.extend({
 
   writing: function () {
     if (this.props.latestStableVersion) {
-      var target_url = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
-      var filename = url.parse(target_url).pathname.split('/').pop();
-      var req = request(target_url);
+      var targetUrl = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
+      var targetName = url.parse(targetUrl).pathname.split('/').pop();
+      var req = request(targetUrl);
       var bar;
+      var targetDestination = this.destinationPath(targetName);
       req
       .on('data', function (chunk) {
         bar = bar || new progressBar('Downloading... [:bar] :percent :etas', {
           complete: '=',
           incomplete: ' ',
-          width: 25,
+          width: 50,
           total: parseInt(req.response.headers['content-length'])
         });
 
         bar.tick(chunk.length);
       })
-      .pipe(fs.createWriteStream(this.destinationPath(filename)))
+      .pipe(fs.createWriteStream(targetDestination))
       .on('close', function (err) {
         bar.tick(bar.total - bar.curr);
+        console.log('Extracting the archive...');
+        var zip = new admZip(targetDestination);
+        zip.extractAllTo(targetDestination.slice(0, -4));
       });
     }
   },
