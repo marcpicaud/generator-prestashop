@@ -8,7 +8,6 @@ var progressBar = require('progress');
 var fs = require('fs');
 var admZip = require('adm-zip');
 var winston = require('winston');
-var path = require('path');
 var exec = require('child_process').exec;
 
 module.exports = yeoman.generators.Base.extend({
