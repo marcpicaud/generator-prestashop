@@ -4,11 +4,10 @@ var chalk = require('chalk');
 var yosay = require('yosay');
 var request = require('request');
 var url = require('url');
-var progressBar = require('progress');
+var ProgressBar = require('progress');
 var fs = require('fs');
-var admZip = require('adm-zip');
+var AdmZip = require('adm-zip');
 var winston = require('winston');
-var path = require('path');
 var exec = require('child_process').exec;
 
 module.exports = yeoman.generators.Base.extend({
@@ -50,20 +49,23 @@ module.exports = yeoman.generators.Base.extend({
       var finalName = this.destinationPath(zipName).slice(0, -4);
       req
       .on('data', function (chunk) {
-        bar = bar || new progressBar('Downloading... [:bar] :percent :etas', {
+        bar = bar || new ProgressBar('Downloading... [:bar] :percent :etas', {
           complete: '=',
           incomplete: ' ',
           width: 50,
-          total: parseInt(req.response.headers['content-length'])
+          total: parseInt(req.response.headers['content-length'], 10)
         });
 
         bar.tick(chunk.length);
       })
       .pipe(fs.createWriteStream(zipDestination))
       .on('close', function (err) {
+        if (err) {
+          winston.log('error', err.toString());
+        }
         bar.tick(bar.total - bar.curr);
         winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
-        var zip = new admZip(zipDestination);
+        var zip = new AdmZip(zipDestination);
         zip.extractAllTo(extractDestination);
         fs.unlink(zipDestination, function (err) {
           if (err) {
