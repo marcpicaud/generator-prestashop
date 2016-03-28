@@ -60,6 +60,9 @@ module.exports = yeoman.generators.Base.extend({
       })
       .pipe(fs.createWriteStream(zipDestination))
       .on('close', function (err) {
+        if (err) {
+          winston.log('error', err.toString());
+        }
         bar.tick(bar.total - bar.curr);
         winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
         var zip = new admZip(zipDestination);
