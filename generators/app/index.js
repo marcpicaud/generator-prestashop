@@ -4,7 +4,7 @@ var chalk = require('chalk');
 var yosay = require('yosay');
 var request = require('request');
 var url = require('url');
-var progressBar = require('progress');
+var ProgressBar = require('progress');
 var fs = require('fs');
 var admZip = require('adm-zip');
 var winston = require('winston');
@@ -49,7 +49,7 @@ module.exports = yeoman.generators.Base.extend({
       var finalName = this.destinationPath(zipName).slice(0, -4);
       req
       .on('data', function (chunk) {
-        bar = bar || new progressBar('Downloading... [:bar] :percent :etas', {
+        bar = bar || new ProgressBar('Downloading... [:bar] :percent :etas', {
           complete: '=',
           incomplete: ' ',
           width: 50,
