@@ -53,7 +53,7 @@ module.exports = yeoman.generators.Base.extend({
           complete: '=',
           incomplete: ' ',
           width: 50,
-          total: parseInt(req.response.headers['content-length'])
+          total: parseInt(req.response.headers['content-length'], 10)
         });
 
         bar.tick(chunk.length);
