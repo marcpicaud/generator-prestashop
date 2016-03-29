@@ -350,8 +350,11 @@ module.exports = yeoman.Base.extend({
                 winston.log('error', err.toString());
               } else {
                 console.log(chalk.green('A new PrestaShop store is born!'));
+                console.log(chalk.blue('BackOffice: http://' + this.props.storeDomain));
+                console.log(chalk.blue('Login: ' + this.props.boEmail));
+                console.log(chalk.blue('Password: ' + this.props.boPassword));
               }
-            });
+            }.bind(this));
           }.bind(this));
         }
       }.bind(this));

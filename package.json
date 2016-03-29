@@ -1,7 +1,7 @@
 {
   "name": "generator-prestashop",
-  "version": "0.0.2",
-  "description": "Generate a PrestaShop store",
+  "version": "1.0.0",
+  "description": "One-liner command to download and install any version of PrestaShop",
   "homepage": "https://github.com/marcpicaud/generator-prestashop",
   "author": {
     "name": "Marc Picaud",
