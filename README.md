@@ -1,7 +1,7 @@
 # generator-prestashop [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url] [![Coverage percentage][coveralls-image]][coveralls-url]
 > Generate a PrestaShop store
 
-This generator scaffolds a fresh PrestaShop store. For now, it can only grab the the latest stable release and unzip ip for you. More features are coming.
+This generator scaffolds a fresh PrestaShop store. It's kind of a hacky thing (for now), but it will save you some precious time if you often need to bootstrap a store.
 ## Installation
 
 First, install [Yeoman](http://yeoman.io) and generator-prestashop using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
@@ -17,15 +17,14 @@ Then generate your new project:
 yo prestashop
 ```
 
+You can choose the release of your choice. When the scaffolding is complete, just put the folder on a webserver and you can install everything from your browser (CLI installation is coming);
+
 ## TODO
-- [x] Quickly fetch the latest release by typing `yo prestashop`
+- [x] Working `yo prestashop`
 - [ ] Add a progress bar when extracting the archive
-- [ ] Select the PrestaShop version to download
+- [x] Select the PrestaShop version to download
+- [ ] Scrap the release numbers instead of hardcode them :unamused:
 - [ ] Skip the browser installation process
-
-## Getting To Know Yeoman
-
-Yeoman has a heart of gold. He&#39;s a person with feelings and opinions, but he&#39;s very easy to work with. If you think he&#39;s too opinionated, he can be easily convinced. Feel free to [learn more about him](http://yeoman.io/).
 
 ## License
 
