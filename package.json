@@ -1,7 +1,7 @@
 {
   "name": "generator-prestashop",
-  "version": "0.0.2",
-  "description": "Generate a PrestaShop store",
+  "version": "1.0.0",
+  "description": "One-liner command to download and install any version of PrestaShop",
   "homepage": "https://github.com/marcpicaud/generator-prestashop",
   "author": {
     "name": "Marc Picaud",
@@ -19,8 +19,10 @@
   "dependencies": {
     "adm-zip": "^0.4.7",
     "chalk": "^1.0.0",
+    "mysql": "^2.10.2",
     "progress": "^1.1.8",
     "request": "^2.69.0",
+    "validator": "^5.1.0",
     "yeoman-generator": "^0.22.5",
     "yosay": "^1.0.2"
   },
