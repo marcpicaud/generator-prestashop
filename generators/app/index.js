@@ -10,6 +10,7 @@ var AdmZip = require('adm-zip');
 var winston = require('winston');
 var exec = require('child_process').exec;
 var validator = require('validator');
+var mysql = require('mysql');
 
 module.exports = yeoman.Base.extend({
 
@@ -153,8 +154,11 @@ module.exports = yeoman.Base.extend({
       {
         type: 'input',
         name: 'storeDomain',
-        message: 'Domain Name',
-        default: 'localhost'
+        message: 'Domain Name (IP or FQDN)',
+        validate: function (str) {
+          return validator.isIP(str) || validator.isFQDN(str);
+        },
+        default: '127.0.0.1'
       },
       {
         type: 'input',
@@ -239,7 +243,6 @@ module.exports = yeoman.Base.extend({
 
   writing: function () {
     winston.level = 'info';
-    var release = '';
     var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + this.props.release + '.zip';
     var zipName = url.parse(zipUrl).pathname.split('/').pop();
     var req = request(zipUrl);
@@ -286,8 +289,6 @@ module.exports = yeoman.Base.extend({
             } else if (stderr) {
               winston.log('error', stderr.toString());
             } else {
-              winston.log('info', '...done.');
-              console.log(chalk.green('A new PrestaShop store is born!'));
             }
           });
           var installScript = this.destinationPath('prestashop_' + this.props.release + '/install/index_cli.php');
@@ -313,6 +314,40 @@ module.exports = yeoman.Base.extend({
             }
             if (stderr) {
               winston.log('info', 'stderr: ' + stderr);
+            }
+          });
+          var connection = mysql.createConnexion({
+            host: this.props.dbServer,
+            user: this.props.dbUser,
+            password: this.props.dbPassword,
+            database: this.props.dbName
+          }).connect();
+          var physicalUri = '/prestashop_' + this.props.release + '/';
+          connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=' + physicalUri + ' WHERE id_shop=1', function (err) {
+            if (err) {
+              winston.log('error', err.toString());
+            }
+          });
+          connection.end();
+
+          winston.log('info', 'removing the install directory...');
+          exec('rm -r ' + this.destinationPath('prestashop_' + this.props.release + '/install'), function (err, stdout, stderr) {
+            if (err) {
+              winston.log('error', err.toString());
+            }
+            if (stdout) {
+              winston.log('info', stdout);
+            }
+            if (stderr) {
+              winston.log('error', stderr);
+            }
+          });
+          winston.log('info', 'renaming the admin directory...');
+          fs.rename(finalName + '/admin', finalName + '/admin1234', function (err) {
+            if (err) {
+              winston.log('error', err.toString());
+            } else {
+              console.log(chalk.green('A new PrestaShop store is born!'));
             }
           });
         }
