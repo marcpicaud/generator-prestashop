@@ -9,6 +9,7 @@ var fs = require('fs');
 var AdmZip = require('adm-zip');
 var winston = require('winston');
 var exec = require('child_process').exec;
+var validator = require('validator');
 
 module.exports = yeoman.Base.extend({
 
@@ -148,6 +149,82 @@ module.exports = yeoman.Base.extend({
           '1.0',
           '0.9.7'
         ]
+      },
+      {
+        type: 'input',
+        name: 'storeDomain',
+        message: 'Domain Name',
+        default: 'localhost'
+      },
+      {
+        type: 'input',
+        name: 'dbServer',
+        message: 'Database Server',
+        default: 'localhost'
+      },
+      {
+        type: 'input',
+        name: 'dbUser',
+        message: 'Datase User',
+        default: 'root'
+      },
+      {
+        type: 'password',
+        name: 'dbPassword',
+        message: 'Datase Password',
+        default: 'root'
+      },
+      {
+        type: 'input',
+        name: 'dbName',
+        message: 'Datase Name',
+        default: 'prestashop'
+      },
+      {
+        type: 'confirm',
+        name: 'dbClear',
+        message: 'Drop existing tables?',
+        default: true
+      },
+      {
+        type: 'input',
+        name: 'dbPrefix',
+        message: 'Table prefix',
+        default: 'ps_'
+      },
+      {
+        type: 'list',
+        name: 'dbEngine',
+        message: 'Database Engine',
+        choices: [
+          'InnoDB',
+          'MyISAM'
+        ],
+        default: 'ps_'
+      },
+      {
+        type: 'input',
+        name: 'storeName',
+        message: 'storeName',
+        default: 'MyPrestaShop'
+      },
+      {
+        type: 'input',
+        name: 'email',
+        message: 'BackOffice login (email)',
+        validate: function (str) {
+          return validator.isEmail(str);
+        },
+        default: 'pub@prestashop.com'
+      },
+      {
+        type: 'password',
+        name: 'boPassword',
+        message: 'BackOffice password (8 characters)',
+        validate: function (str) {
+          return validator.isLength(str, {min: 8, max: undefined});
+        },
+        default: '12345678'
       }
     ];
 
@@ -219,6 +296,28 @@ module.exports = yeoman.Base.extend({
   },
 
   install: function () {
-    var installScript = this.destinationPath('prestashop_' + this.props.release)
+    var installScript = this.destinationPath('prestashop_' + this.props.release + '/install/index_cli.php');
+    var args = ' --domain=' + this.props.storeDomain + 
+      ' --db_server=' + this.props.dbServer +
+      ' --db_user=' + this.props.dbUser +
+      ' --db_password=' + this.props.dbPassword +
+      ' --db_name=' + this.props.dbName +
+      ' --db_clear=' + this.props.dbClear +
+      ' --prefix=' + this.props.prefix +
+      ' --engine=' + this.props.engine +
+      ' --name=' + this.props.storeName +
+      ' --password=' + this.props.boPassword +
+      ' --email=' + this.props.boEmail +
+      ' --newsletter=0';
+
+    winston.log('info', 'Installation in progress...');
+    exec('php ' + installScript + args, function (err, stdout, stderr) {
+      if (err) {
+        winston.log('error', err.toString());
+      }
+      winston.log('info', 'stdout: ' + stdout);
+      winston.log('info', 'stderr: ' + stderr);
+    });
+
   }
 });
