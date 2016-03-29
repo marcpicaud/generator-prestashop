@@ -352,7 +352,7 @@ module.exports = yeoman.Base.extend({
                 console.log(chalk.green('A new PrestaShop store is born!'));
               }
             });
-          });
+          }.bind(this));
         }
       }.bind(this));
     }.bind(this));
