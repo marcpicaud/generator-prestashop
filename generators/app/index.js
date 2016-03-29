@@ -152,6 +152,9 @@ module.exports = yeoman.Base.extend({
     ];
 
     this.prompt(prompts, function (props) {
+      if (props.latestStableVersion) {
+        props.release = '1.6.1.4';
+      }
       this.props = props;
       done();
     }.bind(this));
@@ -160,12 +163,7 @@ module.exports = yeoman.Base.extend({
   writing: function () {
     winston.level = 'info';
     var release = '';
-    if (this.props.latestStableVersion) {
-      release = '1.6.1.4';
-    } else {
-      release = this.props.release;
-    }
-    var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + release + '.zip';
+    var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + this.props.release + '.zip';
     var zipName = url.parse(zipUrl).pathname.split('/').pop();
     var req = request(zipUrl);
     var bar;
@@ -221,6 +219,6 @@ module.exports = yeoman.Base.extend({
   },
 
   install: function () {
-    // this.installDependencies();
+    var installScript = this.destinationPath('prestashop_' + this.props.release)
   }
 });
