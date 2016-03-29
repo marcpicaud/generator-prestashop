@@ -21,6 +21,7 @@
     "chalk": "^1.0.0",
     "progress": "^1.1.8",
     "request": "^2.69.0",
+    "validator": "^5.1.0",
     "yeoman-generator": "^0.22.5",
     "yosay": "^1.0.2"
   },
