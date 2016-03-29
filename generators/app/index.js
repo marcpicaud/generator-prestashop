@@ -315,42 +315,43 @@ module.exports = yeoman.Base.extend({
             if (stderr) {
               winston.log('info', 'stderr: ' + stderr);
             }
-          });
-          var connection = mysql.createConnection({
-            host: this.props.dbServer,
-            user: this.props.dbUser,
-            password: this.props.dbPassword,
-            database: this.props.dbName
-          });
+            var connection = mysql.createConnection({
+              host: this.props.dbServer,
+              user: this.props.dbUser,
+              password: this.props.dbPassword,
+              database: this.props.dbName
+            });
+            connection.connect();
+            
+            winston.log('info', 'Putting the right physical URI into the database...');
+            var physicalUri = '/prestashop_' + this.props.release + '/';
+            connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1', function (err) {
+              if (err) {
+                winston.log('error', err.toString());
+              }
+            });
+            connection.end();
 
-          connection.connect();
-          var physicalUri = '/prestashop_' + this.props.release + '/';
-          connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1', function (err) {
-            if (err) {
-              winston.log('error', err.toString());
-            }
-          });
-          connection.end();
-
-          winston.log('info', 'removing the install directory...');
-          exec('rm -r ' + this.destinationPath('prestashop_' + this.props.release + '/install'), function (err, stdout, stderr) {
-            if (err) {
-              winston.log('error', err.toString());
-            }
-            if (stdout) {
-              winston.log('info', stdout);
-            }
-            if (stderr) {
-              winston.log('error', stderr);
-            }
-          });
-          winston.log('info', 'renaming the admin directory...');
-          fs.rename(finalName + '/admin', finalName + '/admin1234', function (err) {
-            if (err) {
-              winston.log('error', err.toString());
-            } else {
-              console.log(chalk.green('A new PrestaShop store is born!'));
-            }
+            winston.log('info', 'removing the install directory...');
+            exec('rm -r ' + this.destinationPath('prestashop_' + this.props.release + '/install'), function (err, stdout, stderr) {
+              if (err) {
+                winston.log('error', err.toString());
+              }
+              if (stdout) {
+                winston.log('info', stdout);
+              }
+              if (stderr) {
+                winston.log('error', stderr);
+              }
+            });
+            winston.log('info', 'renaming the admin directory...');
+            fs.rename(finalName + '/admin', finalName + '/admin1234', function (err) {
+              if (err) {
+                winston.log('error', err.toString());
+              } else {
+                console.log(chalk.green('A new PrestaShop store is born!'));
+              }
+            });
           });
         }
       }.bind(this));
