@@ -316,7 +316,7 @@ module.exports = yeoman.Base.extend({
               winston.log('info', 'stderr: ' + stderr);
             }
           });
-          var connection = mysql.createConnexion({
+          var connection = mysql.createConnection({
             host: this.props.dbServer,
             user: this.props.dbUser,
             password: this.props.dbPassword,
