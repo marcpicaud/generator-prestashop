@@ -308,8 +308,12 @@ module.exports = yeoman.Base.extend({
             if (err) {
               winston.log('error', err.toString());
             }
-            winston.log('info', 'stdout: ' + stdout);
-            winston.log('info', 'stderr: ' + stderr);
+            if (stdout) {
+              winston.log('info', 'stdout: ' + stdout);
+            }
+            if (stderr) {
+              winston.log('info', 'stderr: ' + stderr);
+            }
           });
         }
       }.bind(this));
