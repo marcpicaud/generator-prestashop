@@ -17,7 +17,7 @@ Then generate your new project:
 yo prestashop
 ```
 
-You can choose the release of your choice. When the scaffolding is complete, just put the folder on a webserver and you can install everything from your browser (CLI installation is coming);
+You can choose the release of your choice. 
 
 ## TODO
 - [x] Working `yo prestashop`
