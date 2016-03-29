@@ -10,92 +10,214 @@ var AdmZip = require('adm-zip');
 var winston = require('winston');
 var exec = require('child_process').exec;
 
-module.exports = yeoman.generators.Base.extend({
+module.exports = yeoman.Base.extend({
+
   prompting: function () {
     var done = this.async();
-
     // Have Yeoman greet the user.
     this.log(yosay(
       'Welcome to the fantastic ' + chalk.red('PrestaShop') + ' generator!'
     ));
 
-    var prompts = [{
-      type: 'confirm',
-      name: 'latestStableVersion',
-      message: 'Would you like to use the latest stable version?',
-      default: true
-    }];
+    var prompts = [
+      {
+        type: 'confirm',
+        name: 'latestStableVersion',
+        message: 'Would you like to grab the latest PrestaShop release?',
+        default: true
+      },
+      {when: function (response) {
+        return !response.latestStableVersion;
+      },
+        type: 'list',
+        name: 'release',
+        message: 'Which one do you want ?',
+        // I'm fucking lost in callbacks hell when trying to build this array
+        // programmatically
+        choices: [
+          '1.6.1.4 (latest)',
+          '1.6.1.3',
+          '1.6.1.3-rc1',
+          '1.6.1.2',
+          '1.6.1.2-rc4',
+          '1.6.1.2-rc3',
+          '1.6.1.2-rc2',
+          '1.6.1.2-rc1',
+          '1.6.1.1',
+          '1.6.1.1-rc2',
+          '1.6.1.1-rc1',
+          '1.6.1.0',
+          '1.6.1.0-rc5',
+          '1.6.1.0-rc4',
+          '1.6.0.14',
+          '1.6.0.13',
+          '1.6.0.12',
+          '1.6.0.11',
+          '1.6.0.9',
+          '1.6.0.8',
+          '1.6.0.7',
+          '1.6.0.6',
+          '1.6.0.5',
+          '1.6.0.4',
+          '1.6.0.3',
+          '1.6.0.2',
+          '1.6.0.1',
+          '1.5.6.3',
+          '1.5.6.2',
+          '1.5.6.1',
+          '1.5.6.0',
+          '1.5.5.0',
+          '1.5.4.1',
+          '1.5.4.0',
+          '1.5.3.1',
+          '1.5.3.0',
+          '1.5.2.0',
+          '1.5.1.0',
+          '1.5.0.17',
+          '1.5.0.15',
+          '1.5.0.13',
+          '1.5.0.9',
+          '1.5.0.5',
+          '1.5.0.3',
+          '1.5.0.2',
+          '1.5.0.1',
+          '1.4.11.1',
+          '1.4.11.0',
+          '1.4.10.0',
+          '1.4.9.0',
+          '1.4.8.3',
+          '1.4.8.2',
+          '1.4.7.3',
+          '1.4.7.2',
+          '1.4.7.0',
+          '1.4.6.2',
+          '1.4.6.1',
+          '1.4.5.1',
+          '1.4.4.1',
+          '1.4.4.0',
+          '1.4.3.0',
+          '1.4.2.5',
+          '1.4.1.0',
+          '1.4.0.17',
+          '1.4.0.14',
+          '1.4.0.13',
+          '1.4.0.12',
+          '1.4.0.11',
+          '1.4.0.10',
+          '1.4.0.9',
+          '1.4.0.8',
+          '1.4.0.7',
+          '1.4.0.6',
+          '1.4.0.5',
+          '1.4.0.4',
+          '1.4.0.3',
+          '1.4.0.2',
+          '1.4.0.1',
+          '1.3.7.0',
+          '1.3.6.0',
+          '1.3.5.0',
+          '1.3.4.0',
+          '1.3.3.0',
+          '1.3.2.3',
+          '1.3.0.10',
+          '1.3.0.9',
+          '1.3.0.8',
+          '1.3.0.7',
+          '1.3.0.6',
+          '1.3.0.5',
+          '1.3.0.4',
+          '1.3.0.3',
+          '1.3.0.2',
+          '1.3.1',
+          '1.3.0.1',
+          '1.3',
+          '1.2.5.0',
+          '1.2.4.0',
+          '1.2.3.0',
+          '1.2.2.0',
+          '1.2.1.0',
+          '1.2.0.8',
+          '1.2.0.7',
+          '1.2.0.6',
+          '1.2.0.5',
+          '1.2.0.4',
+          '1.2.0.3',
+          '1.2.0.1',
+          '1.1.0.1',
+          '1.1',
+          '1.0',
+          '0.9.7'
+        ]
+      }
+    ];
 
     this.prompt(prompts, function (props) {
       this.props = props;
-      // To access props later use this.props.someOption;
-
       done();
     }.bind(this));
   },
 
   writing: function () {
     winston.level = 'info';
+    var release = '';
     if (this.props.latestStableVersion) {
-      var zipUrl = 'https://www.prestashop.com/download/old/prestashop_1.6.1.4.zip';
-      // prestashop_1.6.1.4.zip
-      var zipName = url.parse(zipUrl).pathname.split('/').pop();
-      var req = request(zipUrl);
-      var bar;
-      // path/to/destination/tmp
-      var zipDestination = this.destinationPath('tmp');
-      // path/to/destination/prestashop_1.6.1.4
-      var extractDestination = this.destinationPath('presta');
-      var finalName = this.destinationPath(zipName).slice(0, -4);
-      req
-      .on('data', function (chunk) {
-        bar = bar || new ProgressBar('Downloading... [:bar] :percent :etas', {
-          complete: '=',
-          incomplete: ' ',
-          width: 50,
-          total: parseInt(req.response.headers['content-length'], 10)
-        });
+      release = '1.6.1.4';
+    } else {
+      release = this.props.release;
+    }
+    var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + release + '.zip';
+    var zipName = url.parse(zipUrl).pathname.split('/').pop();
+    var req = request(zipUrl);
+    var bar;
+    var zipDestination = this.destinationPath('tmp');
+    var extractDestination = this.destinationPath('presta');
+    var finalName = this.destinationPath(zipName).slice(0, -4);
+    req
+    .on('data', function (chunk) {
+      bar = bar || new ProgressBar('Downloading... [:bar] :percent :etas', {
+        complete: '=',
+        incomplete: ' ',
+        width: 50,
+        total: parseInt(req.response.headers['content-length'], 10)
+      });
 
-        bar.tick(chunk.length);
-      })
-      .pipe(fs.createWriteStream(zipDestination))
-      .on('close', function (err) {
+      bar.tick(chunk.length);
+    })
+    .pipe(fs.createWriteStream(zipDestination))
+    .on('close', function (err) {
+      if (err) {
+        winston.log('error', err.toString());
+      }
+      bar.tick(bar.total - bar.curr);
+      winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
+      var zip = new AdmZip(zipDestination);
+      zip.extractAllTo(extractDestination);
+      fs.unlink(zipDestination, function (err) {
         if (err) {
           winston.log('error', err.toString());
+        } else {
         }
-        bar.tick(bar.total - bar.curr);
-        winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
-        var zip = new AdmZip(zipDestination);
-        zip.extractAllTo(extractDestination);
-        fs.unlink(zipDestination, function (err) {
-          if (err) {
-            winston.log('error', err.toString());
-          } else {
-          }
-        });
-        winston.log('info', 'Cleanup everything...');
-        fs.rename(extractDestination + '/prestashop', finalName, function (err) {
-          if (err) {
-            winston.log('error', err.toString());
-          } else {
-            exec('rm -r ' + extractDestination, function (err, stdout, stderr) {
-              if (err) {
-                winston.log('error', err.toString());
-              } else if (stdout) {
-                winston.log('error', stdout.toString());
-              } else if (stderr) {
-                winston.log('error', stderr.toString());
-              } else {
-                winston.log('info', '...done.');
-                console.log(chalk.green('A new PrestaShop store is born!'));
-              }
-            });
-          }
-        });
       });
-    } else {
-      console.log(chalk.red('Sorry dude, I\'m not able to fetch old PrestaShop version yet'));
-    }
+      winston.log('info', 'Cleanup everything...');
+      fs.rename(extractDestination + '/prestashop', finalName, function (err) {
+        if (err) {
+          winston.log('error', err.toString());
+        } else {
+          exec('rm -r ' + extractDestination, function (err, stdout, stderr) {
+            if (err) {
+              winston.log('error', err.toString());
+            } else if (stdout) {
+              winston.log('error', stdout.toString());
+            } else if (stderr) {
+              winston.log('error', stderr.toString());
+            } else {
+              winston.log('info', '...done.');
+              console.log(chalk.green('A new PrestaShop store is born!'));
+            }
+          });
+        }
+      });
+    });
   },
 
   install: function () {
