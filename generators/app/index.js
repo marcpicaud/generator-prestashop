@@ -9,6 +9,8 @@ var fs = require('fs');
 var AdmZip = require('adm-zip');
 var winston = require('winston');
 var exec = require('child_process').exec;
+var validator = require('validator');
+var mysql = require('mysql');
 
 module.exports = yeoman.Base.extend({
 
@@ -148,10 +150,92 @@ module.exports = yeoman.Base.extend({
           '1.0',
           '0.9.7'
         ]
+      },
+      {
+        type: 'input',
+        name: 'storeDomain',
+        message: 'Domain Name (IP or FQDN)',
+        validate: function (str) {
+          return validator.isIP(str) || validator.isFQDN(str);
+        },
+        default: '127.0.0.1'
+      },
+      {
+        type: 'input',
+        name: 'dbServer',
+        message: 'Database Server',
+        default: 'localhost'
+      },
+      {
+        type: 'input',
+        name: 'dbUser',
+        message: 'Datase User',
+        default: 'root'
+      },
+      {
+        type: 'password',
+        name: 'dbPassword',
+        message: 'Datase Password',
+        default: 'root'
+      },
+      {
+        type: 'input',
+        name: 'dbName',
+        message: 'Datase Name',
+        default: 'prestashop'
+      },
+      {
+        type: 'confirm',
+        name: 'dbClear',
+        message: 'Drop existing tables?',
+        default: true
+      },
+      {
+        type: 'input',
+        name: 'dbPrefix',
+        message: 'Table prefix',
+        default: 'ps_'
+      },
+      {
+        type: 'list',
+        name: 'dbEngine',
+        message: 'Database Engine',
+        choices: [
+          'InnoDB',
+          'MyISAM'
+        ],
+        default: 'InnoDB'
+      },
+      {
+        type: 'input',
+        name: 'storeName',
+        message: 'Name of the shop',
+        default: 'MyPrestaShop'
+      },
+      {
+        type: 'input',
+        name: 'boEmail',
+        message: 'BackOffice login (email)',
+        validate: function (str) {
+          return validator.isEmail(str);
+        },
+        default: 'pub@prestashop.com'
+      },
+      {
+        type: 'password',
+        name: 'boPassword',
+        message: 'BackOffice password (8 characters)',
+        validate: function (str) {
+          return validator.isLength(str, {min: 8, max: undefined});
+        },
+        default: '12345678'
       }
     ];
 
     this.prompt(prompts, function (props) {
+      if (props.latestStableVersion) {
+        props.release = '1.6.1.4';
+      }
       this.props = props;
       done();
     }.bind(this));
@@ -159,13 +243,7 @@ module.exports = yeoman.Base.extend({
 
   writing: function () {
     winston.level = 'info';
-    var release = '';
-    if (this.props.latestStableVersion) {
-      release = '1.6.1.4';
-    } else {
-      release = this.props.release;
-    }
-    var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + release + '.zip';
+    var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + this.props.release + '.zip';
     var zipName = url.parse(zipUrl).pathname.split('/').pop();
     var req = request(zipUrl);
     var bar;
@@ -211,16 +289,72 @@ module.exports = yeoman.Base.extend({
             } else if (stderr) {
               winston.log('error', stderr.toString());
             } else {
-              winston.log('info', '...done.');
-              console.log(chalk.green('A new PrestaShop store is born!'));
             }
           });
-        }
-      });
-    });
-  },
+          var installScript = this.destinationPath('prestashop_' + this.props.release + '/install/index_cli.php');
+          var args = ' --domain=' + this.props.storeDomain + 
+            ' --db_server=' + this.props.dbServer +
+            ' --db_user=' + this.props.dbUser +
+            ' --db_password=' + this.props.dbPassword +
+            ' --db_name=' + this.props.dbName +
+            ' --db_clear=' + Number(this.props.dbClear).toString() +
+            ' --prefix=' + this.props.dbPrefix +
+            ' --engine=' + this.props.dbEngine +
+            ' --name=' + this.props.storeName +
+            ' --password=' + this.props.boPassword +
+            ' --email=' + this.props.boEmail +
+            ' --newsletter=0';
+          winston.log('info', 'Installation in progress...');
+          exec('php ' + installScript + args, function (err, stdout, stderr) {
+            if (err) {
+              winston.log('error', err.toString());
+            }
+            if (stdout) {
+              winston.log('info', 'stdout: ' + stdout);
+            }
+            if (stderr) {
+              winston.log('info', 'stderr: ' + stderr);
+            }
+            var connection = mysql.createConnection({
+              host: this.props.dbServer,
+              user: this.props.dbUser,
+              password: this.props.dbPassword,
+              database: this.props.dbName
+            });
+            connection.connect();
+            
+            winston.log('info', 'Putting the right physical URI into the database...');
+            var physicalUri = '/prestashop_' + this.props.release + '/';
+            connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1', function (err) {
+              if (err) {
+                winston.log('error', err.toString());
+              }
+            });
+            connection.end();
 
-  install: function () {
-    // this.installDependencies();
+            winston.log('info', 'removing the install directory...');
+            exec('rm -r ' + this.destinationPath('prestashop_' + this.props.release + '/install'), function (err, stdout, stderr) {
+              if (err) {
+                winston.log('error', err.toString());
+              }
+              if (stdout) {
+                winston.log('info', stdout);
+              }
+              if (stderr) {
+                winston.log('error', stderr);
+              }
+            });
+            winston.log('info', 'renaming the admin directory...');
+            fs.rename(finalName + '/admin', finalName + '/admin1234', function (err) {
+              if (err) {
+                winston.log('error', err.toString());
+              } else {
+                console.log(chalk.green('A new PrestaShop store is born!'));
+              }
+            });
+          }.bind(this));
+        }
+      }.bind(this));
+    }.bind(this));
   }
 });
