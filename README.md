@@ -2,6 +2,10 @@
 > Generate a PrestaShop store
 
 This generator scaffolds a fresh PrestaShop store. It's kind of a hacky thing (for now), but it will save you some precious time if you often need to bootstrap a store.
+
+## Requirements
+The installation script will fail if you're running MySQL 5.7, cf. https://github.com/PrestaShop/PrestaShop/pull/4507
+
 ## Installation
 
 First, install [Yeoman](http://yeoman.io) and generator-prestashop using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
@@ -17,14 +21,14 @@ Then generate your new project:
 yo prestashop
 ```
 
-You can choose the release of your choice. 
+You can choose the release version on the prompt. I have NOT tested the CLI installer with every one of them. If you find a bug, please let me know via an issue/PR.
 
 ## TODO
 - [x] Working `yo prestashop`
 - [ ] Add a progress bar when extracting the archive
 - [x] Select the PrestaShop version to download
 - [ ] Scrap the release numbers instead of hardcode them :unamused:
-- [ ] Skip the browser installation process
+- [x] Skip the browser installation process
 
 ## License
 

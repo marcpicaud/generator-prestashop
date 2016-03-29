@@ -200,17 +200,17 @@ module.exports = yeoman.Base.extend({
           'InnoDB',
           'MyISAM'
         ],
-        default: 'ps_'
+        default: 'InnoDB'
       },
       {
         type: 'input',
         name: 'storeName',
-        message: 'storeName',
+        message: 'Name of the shop',
         default: 'MyPrestaShop'
       },
       {
         type: 'input',
-        name: 'email',
+        name: 'boEmail',
         message: 'BackOffice login (email)',
         validate: function (str) {
           return validator.isEmail(str);
@@ -290,34 +290,29 @@ module.exports = yeoman.Base.extend({
               console.log(chalk.green('A new PrestaShop store is born!'));
             }
           });
+          var installScript = this.destinationPath('prestashop_' + this.props.release + '/install/index_cli.php');
+          var args = ' --domain=' + this.props.storeDomain + 
+            ' --db_server=' + this.props.dbServer +
+            ' --db_user=' + this.props.dbUser +
+            ' --db_password=' + this.props.dbPassword +
+            ' --db_name=' + this.props.dbName +
+            ' --db_clear=' + Number(this.props.dbClear).toString() +
+            ' --prefix=' + this.props.dbPrefix +
+            ' --engine=' + this.props.dbEngine +
+            ' --name=' + this.props.storeName +
+            ' --password=' + this.props.boPassword +
+            ' --email=' + this.props.boEmail +
+            ' --newsletter=0';
+          winston.log('info', 'Installation in progress...');
+          exec('php ' + installScript + args, function (err, stdout, stderr) {
+            if (err) {
+              winston.log('error', err.toString());
+            }
+            winston.log('info', 'stdout: ' + stdout);
+            winston.log('info', 'stderr: ' + stderr);
+          });
         }
-      });
-    });
-  },
-
-  install: function () {
-    var installScript = this.destinationPath('prestashop_' + this.props.release + '/install/index_cli.php');
-    var args = ' --domain=' + this.props.storeDomain + 
-      ' --db_server=' + this.props.dbServer +
-      ' --db_user=' + this.props.dbUser +
-      ' --db_password=' + this.props.dbPassword +
-      ' --db_name=' + this.props.dbName +
-      ' --db_clear=' + this.props.dbClear +
-      ' --prefix=' + this.props.prefix +
-      ' --engine=' + this.props.engine +
-      ' --name=' + this.props.storeName +
-      ' --password=' + this.props.boPassword +
-      ' --email=' + this.props.boEmail +
-      ' --newsletter=0';
-
-    winston.log('info', 'Installation in progress...');
-    exec('php ' + installScript + args, function (err, stdout, stderr) {
-      if (err) {
-        winston.log('error', err.toString());
-      }
-      winston.log('info', 'stdout: ' + stdout);
-      winston.log('info', 'stderr: ' + stderr);
-    });
-
+      }.bind(this));
+    }.bind(this));
   }
 });
