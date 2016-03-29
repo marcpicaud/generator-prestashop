@@ -325,7 +325,7 @@ module.exports = yeoman.Base.extend({
 
           connection.connect();
           var physicalUri = '/prestashop_' + this.props.release + '/';
-          connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=' + physicalUri + ' WHERE id_shop=1', function (err) {
+          connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1', function (err) {
             if (err) {
               winston.log('error', err.toString());
             }
