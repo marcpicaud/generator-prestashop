@@ -348,7 +348,7 @@ module.exports = yeoman.Base.extend({
 
     function outputSummary () {
       var deferred = Q.defer()
-      fs.readFile(parent.templatePath('ascii-puffin.txt', 'utf8', function (err, data) {
+      fs.readFile(parent.templatePath('ascii-puffin.txt'), 'utf8', function (err, data) {
         data.replace('urlbo', 'http://' + parent.props.storeDomain + '/backoffice');
         data.replace('loginbo', parent.props.boEmail);
         data.replace('passwordbo', parent.props.boPassword);
@@ -358,7 +358,7 @@ module.exports = yeoman.Base.extend({
         } else {
           deferred.resolve(data);
         }
-      }));
+      });
       // console.log(chalk.green('A new PrestaShop store is born!'));
       // console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/backoffice'));
       // console.log(chalk.blue('Login: ' + parent.props.boEmail));
