@@ -349,7 +349,7 @@ module.exports = yeoman.Base.extend({
     function outputSummary () {
       var deferred = Q.defer()
       console.log(chalk.green('A new PrestaShop store is born!'));
-      console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain));
+      console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/backoffice'));
       console.log(chalk.blue('Login: ' + parent.props.boEmail));
       console.log(chalk.blue('Password: ' + parent.props.boPassword));
       deferred.resolve('ok');
