@@ -348,11 +348,22 @@ module.exports = yeoman.Base.extend({
 
     function outputSummary () {
       var deferred = Q.defer()
-      console.log(chalk.green('A new PrestaShop store is born!'));
-      console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/backoffice'));
-      console.log(chalk.blue('Login: ' + parent.props.boEmail));
-      console.log(chalk.blue('Password: ' + parent.props.boPassword));
-      deferred.resolve('ok');
+      fs.readFile(parent.templatePath('ascii-puffin.txt', 'utf8', function (err, data) {
+        data.replace('urlbo', 'http://' + parent.props.storeDomain + '/backoffice');
+        data.replace('loginbo', parent.props.boEmail);
+        data.replace('passwordbo', parent.props.boPassword);
+        console.log(chalk.blue(data));
+        if (err) {
+          deferred.reject(err);
+        } else {
+          deferred.resolve(data);
+        }
+      }));
+      // console.log(chalk.green('A new PrestaShop store is born!'));
+      // console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/backoffice'));
+      // console.log(chalk.blue('Login: ' + parent.props.boEmail));
+      // console.log(chalk.blue('Password: ' + parent.props.boPassword));
+      // deferred.resolve('ok');
       return deferred.promise;
     }
 
