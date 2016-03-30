@@ -7,7 +7,6 @@ var url = require('url');
 var ProgressBar = require('progress');
 var fs = require('fs');
 var AdmZip = require('adm-zip');
-var winston = require('winston');
 var exec = require('child_process').exec;
 var validator = require('validator');
 var mysql = require('mysql');
@@ -242,7 +241,6 @@ module.exports = yeoman.Base.extend({
   },
 
   writing: function () {
-    winston.level = 'info';
     var zipUrl = 'https://www.prestashop.com/download/old/prestashop_' + this.props.release + '.zip';
     var zipName = url.parse(zipUrl).pathname.split('/').pop();
     var req = request(zipUrl);
@@ -264,30 +262,30 @@ module.exports = yeoman.Base.extend({
     .pipe(fs.createWriteStream(zipDestination))
     .on('close', function (err) {
       if (err) {
-        winston.log('error', err.toString());
+        console.log(err);
       }
       bar.tick(bar.total - bar.curr);
-      winston.log('info', 'Extracting the archive... Don\'t your dare ^C !');
+      console.log('Extracting the archive... Don\'t your dare ^C !');
       var zip = new AdmZip(zipDestination);
       zip.extractAllTo(extractDestination);
       fs.unlink(zipDestination, function (err) {
         if (err) {
-          winston.log('error', err.toString());
+          console.log(err);
         } else {
         }
       });
-      winston.log('info', 'Cleanup everything...');
+      console.log('Cleanup everything...');
       fs.rename(extractDestination + '/prestashop', finalName, function (err) {
         if (err) {
-          winston.log('error', err.toString());
+          console.log(err);
         } else {
           exec('rm -r ' + extractDestination, function (err, stdout, stderr) {
             if (err) {
-              winston.log('error', err.toString());
+              console.log(err);
             } else if (stdout) {
-              winston.log('error', stdout.toString());
+              console.log('stdout: ' + stdout);
             } else if (stderr) {
-              winston.log('error', stderr.toString());
+              console.log('stderr: ' +  stderr);
             } else {
             }
           });
@@ -304,16 +302,16 @@ module.exports = yeoman.Base.extend({
             ' --password=' + this.props.boPassword +
             ' --email=' + this.props.boEmail +
             ' --newsletter=0';
-          winston.log('info', 'Installation in progress...');
+          console.log('Installation in progress...');
           exec('php ' + installScript + args, function (err, stdout, stderr) {
             if (err) {
-              winston.log('error', err.toString());
+              console.log(err);
             }
             if (stdout) {
-              winston.log('info', 'stdout: ' + stdout);
+              console.log('stdout: ' + stdout);
             }
             if (stderr) {
-              winston.log('info', 'stderr: ' + stderr);
+              console.log('stderr: ' + stderr);
             }
             var connection = mysql.createConnection({
               host: this.props.dbServer,
@@ -323,31 +321,31 @@ module.exports = yeoman.Base.extend({
             });
             connection.connect();
             
-            winston.log('info', 'Putting the right physical URI into the database...');
+            console.log('info', 'Putting the right physical URI into the database...');
             var physicalUri = '/prestashop_' + this.props.release + '/';
             connection.query('UPDATE ' + this.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1', function (err) {
               if (err) {
-                winston.log('error', err.toString());
+                console.log(err);
               }
             });
             connection.end();
 
-            winston.log('info', 'removing the install directory...');
+            console.log('removing the install directory...');
             exec('rm -r ' + this.destinationPath('prestashop_' + this.props.release + '/install'), function (err, stdout, stderr) {
               if (err) {
-                winston.log('error', err.toString());
+                console.log(err);
               }
               if (stdout) {
-                winston.log('info', stdout);
+                console.log('stdout: ' + stdout);
               }
               if (stderr) {
-                winston.log('error', stderr);
+                console.log('stderr: ' + stderr);
               }
             });
-            winston.log('info', 'renaming the admin directory...');
+            console.log('info', 'renaming the admin directory...');
             fs.rename(finalName + '/admin', finalName + '/admin1234', function (err) {
               if (err) {
-                winston.log('error', err.toString());
+                console.log(err);
               } else {
                 console.log(chalk.green('A new PrestaShop store is born!'));
                 console.log(chalk.blue('BackOffice: http://' + this.props.storeDomain));
