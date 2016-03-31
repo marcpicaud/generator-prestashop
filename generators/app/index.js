@@ -298,20 +298,25 @@ module.exports = yeoman.Base.extend({
     function installPrestaShop () {
       console.log('Installing PrestaShop...');
       var deferred = Q.defer();
-      var installScript = finalName + '/install/index_cli.php';
-      var args = ' --domain=' + parent.props.storeDomain + 
-        ' --db_server=' + parent.props.dbServer +
-        ' --db_user=' + parent.props.dbUser +
-        ' --db_password=' + parent.props.dbPassword +
-        ' --db_name=' + parent.props.dbName +
-        ' --db_clear=' + Number(parent.props.dbClear).toString() +
-        ' --prefix=' + parent.props.dbPrefix +
-        ' --engine=' + parent.props.dbEngine +
-        ' --name=' + parent.props.storeName +
-        ' --password=' + parent.props.boPassword +
-        ' --email=' + parent.props.boEmail +
-        ' --newsletter=0';
-      exec('php ' + installScript + args, deferred.makeNodeResolver());
+      if (parent.props.release === '0.9.7') {
+        deferred.reject('This release does not have a CLI installer. Please ' +
+                        'process the installation from your browser');
+      } else {
+        var installScript = finalName + '/install/index_cli.php';
+        var args = ' --domain=' + parent.props.storeDomain + 
+          ' --db_server=' + parent.props.dbServer +
+          ' --db_user=' + parent.props.dbUser +
+          ' --db_password=' + parent.props.dbPassword +
+          ' --db_name=' + parent.props.dbName +
+          ' --db_clear=' + Number(parent.props.dbClear).toString() +
+          ' --prefix=' + parent.props.dbPrefix +
+          ' --engine=' + parent.props.dbEngine +
+          ' --name=' + parent.props.storeName +
+          ' --password=' + parent.props.boPassword +
+          ' --email=' + parent.props.boEmail +
+          ' --newsletter=0';
+        exec('php ' + installScript + args, deferred.makeNodeResolver());
+      }
       return deferred.promise;
     }
 
