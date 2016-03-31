@@ -11,6 +11,7 @@ var exec = require('child_process').exec;
 var validator = require('validator');
 var mysql = require('mysql');
 var Q = require('q');
+var path = require('path');
 
 module.exports = yeoman.Base.extend({
 
@@ -354,15 +355,13 @@ module.exports = yeoman.Base.extend({
     function outputSummary () {
       var deferred = Q.defer()
       fs.readFile(parent.templatePath('ascii-puffin.txt'), 'utf8', function (err, data) {
-        console.log(chalk.blue(data));
         if (err) {
           deferred.reject(err);
         } else {
-          deferred.resolve(data);
+          console.log(chalk.blue(data));
         }
       });
-      console.log(chalk.green('A new PrestaShop store is born!'));
-      console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/backoffice'));
+      console.log(chalk.blue('BackOffice: http://' + parent.props.storeDomain + '/' + path.basename(finalName) + '/backoffice'));
       console.log(chalk.blue('Login: ' + parent.props.boEmail));
       console.log(chalk.blue('Password: ' + parent.props.boPassword));
       deferred.resolve('ok');
