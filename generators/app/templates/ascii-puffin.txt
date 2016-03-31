@@ -1,8 +1,8 @@
           .--.     
          / ,~a`-,  A new PrestaShop store is born ! 
-         \ \_.-"`   BackOffice: urlbo
-          ) (       Login: loginbo
-        ,/ ."\      Password: passwordbo
+         \ \_.-"`
+          ) (
+        ,/ ."\
        /  (  |
       /   )  ;
      /   /  /
