@@ -1,6 +1,6 @@
 {
   "name": "generator-prestashop",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "One-liner command to download and install any version of PrestaShop",
   "homepage": "https://github.com/marcpicaud/generator-prestashop",
   "author": {
@@ -21,6 +21,7 @@
     "chalk": "^1.0.0",
     "mysql": "^2.10.2",
     "progress": "^1.1.8",
+    "q": "^1.4.1",
     "request": "^2.69.0",
     "validator": "^5.1.0",
     "yeoman-generator": "^0.22.5",
@@ -38,7 +39,6 @@
     "gulp-mocha": "^2.0.0",
     "gulp-nsp": "^2.1.0",
     "gulp-plumber": "^1.0.0",
-    "winston": "^2.2.0",
     "yeoman-assert": "^2.0.0"
   },
   "eslintConfig": {
