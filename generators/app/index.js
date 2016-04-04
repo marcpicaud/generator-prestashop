@@ -190,7 +190,13 @@ module.exports = yeoman.Base.extend({
       {
         type: 'confirm',
         name: 'dbClear',
-        message: 'Drop existing tables?',
+        message: 'Drop existing tables if any?',
+        default: true
+      },
+      {
+        type: 'confirm',
+        name: 'dbCreate',
+        message: 'Create database if not exists?',
         default: true
       },
       {
@@ -296,6 +302,33 @@ module.exports = yeoman.Base.extend({
       console.log('Removing zip...');
       exec('rm -r ' + extractDestination, deferred.makeNodeResolver());
       return deferred.promise;
+    }
+
+    function createDbConnection () {
+      return mysql.createConnection({
+        host: parent.props.dbServer,
+        user: parent.props.dbUser,
+        password: parent.props
+      });
+    }
+
+    function checkDatabaseCredentials () {
+      var deferred = Q.defer();
+      var connection = createDbConnection();
+      connection.connect();
+      connection.on('error', function (err) {
+        deferred.reject('Invalid database credentials');
+      });
+
+      return deferred.promise;
+    }
+
+    function createDatabase () {
+      var deferred = Q.defer();
+      if (parent.props.dbCreate) {
+
+      }
+
     }
 
     function installPrestaShop () {
