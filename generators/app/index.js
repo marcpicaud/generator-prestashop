@@ -38,6 +38,7 @@ module.exports = yeoman.Base.extend({
         // I'm fucking lost in callbacks hell when trying to build this array
         // programmatically
         choices: [
+          '1.7.0.0-alpha.4.0',
           '1.7.0.0-alpha.3.0',
           '1.6.1.4',
           '1.6.1.3',
