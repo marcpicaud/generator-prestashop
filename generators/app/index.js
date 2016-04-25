@@ -317,7 +317,7 @@ module.exports = yeoman.Base.extend({
           ' --password=' + parent.props.boPassword +
           ' --email=' + parent.props.boEmail +
           ' --newsletter=0';
-        exec('php ' + installScript + args, deferred.makeNodeResolver());
+        exec('php -d memory_limit=256M ' + installScript + args, deferred.makeNodeResolver());
       }
       return deferred.promise;
     }
