@@ -38,7 +38,7 @@ module.exports = yeoman.Base.extend({
         // I'm fucking lost in callbacks hell when trying to build this array
         // programmatically
         choices: [
-          '1.7.0.0 Alpha3 (latest)',
+          '1.7.0.0-alpha.3.0',
           '1.6.1.4',
           '1.6.1.3',
           '1.6.1.3-rc1',
@@ -236,7 +236,7 @@ module.exports = yeoman.Base.extend({
 
     this.prompt(prompts, function (props) {
       if (props.latestStableVersion) {
-        props.release = '1.7.0.0-alpha.3.0';
+        props.release = '1.6.1.5';
       }
       this.props = props;
       done();
@@ -317,7 +317,7 @@ module.exports = yeoman.Base.extend({
           ' --password=' + parent.props.boPassword +
           ' --email=' + parent.props.boEmail +
           ' --newsletter=0';
-        exec('php ' + installScript + args, deferred.makeNodeResolver());
+        exec('php -d memory_limit=256M ' + installScript + args, deferred.makeNodeResolver());
       }
       return deferred.promise;
     }
