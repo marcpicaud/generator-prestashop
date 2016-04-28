@@ -299,10 +299,11 @@ module.exports = yeoman.Base.extend({
     }
 
     function DBcheck () {
+      var deferred = Q.defer();
       var connection = mysql.createConnection({
         host: parent.props.dbServer,
         user: parent.props.dbUser,
-        password: parent.props
+        password: parent.props.dbPassword
       });
       connection.connect();
       connection.on('error', function (err) {
@@ -312,12 +313,14 @@ module.exports = yeoman.Base.extend({
       connection.query('CREATE DATABASE IF NOT EXISTS ' + parent.props.dbName + ';', function(err) {
         connection.end();
         if (!err) {
-          return true;
+	  deferred.resolve('ok');
         } else {
           console.log(chalk.red('Error: Failed to create database'));
-          return false;
+	  deferred.reject('Failed to create database');
         }
       });
+
+      return deferred.promise;
     }
 
     function installPrestaShop () {
@@ -332,12 +335,6 @@ module.exports = yeoman.Base.extend({
         deferred.reject('No CLI installer found');
         return deferred.promise;
       } 
-
-      // Prevent CLI installer to run if there are some DB errors
-      if (!DBcheck()) {
-        deferred.reject('Database error');
-        return deferred.promise;
-      }
 
       var installScript = finalName + '/install/index_cli.php';
       var args = 
@@ -407,11 +404,9 @@ module.exports = yeoman.Base.extend({
     .then(extract)
     .then(renameFolder)
     .then(removeZip)
+    .then(DBcheck)
     .then(installPrestaShop)
     .then(fixPhysicalUri)
-    .catch(err, function () {
-      throw new Error('Something went wrong.');
-    })
     .then(deleteInstallDir)
     .then(renameAdminDir)
     .then(outputSummary)
