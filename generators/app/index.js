@@ -184,13 +184,13 @@ module.exports = yeoman.Base.extend({
       {
         type: 'input',
         name: 'dbName',
-        message: 'Datase Name',
+        message: 'Datase Name (will be created if not exists)',
         default: 'prestashop'
       },
       {
         type: 'confirm',
         name: 'dbClear',
-        message: 'Drop existing tables?',
+        message: 'Drop existing tables if any?',
         default: true
       },
       {
@@ -298,33 +298,63 @@ module.exports = yeoman.Base.extend({
       return deferred.promise;
     }
 
+    function DBcheck () {
+      var deferred = Q.defer();
+      var connection = mysql.createConnection({
+        host: parent.props.dbServer,
+        user: parent.props.dbUser,
+        password: parent.props.dbPassword
+      });
+      connection.connect();
+      connection.on('error', function (err) {
+        console.log(chalk.red('Error: Invalid database credentials'));
+        return false;
+      });
+      connection.query('CREATE DATABASE IF NOT EXISTS ' + parent.props.dbName + ';', function(err) {
+        connection.end();
+        if (!err) {
+	  deferred.resolve('ok');
+        } else {
+          console.log(chalk.red('Error: Failed to create database'));
+	  deferred.reject('Failed to create database');
+        }
+      });
+
+      return deferred.promise;
+    }
+
     function installPrestaShop () {
       console.log('Installing PrestaShop...');
       var deferred = Q.defer();
+
+      // Prevent installation if the PrestaShop release does not contain a CLI installer
+      // TODO: Complete list 
       if (parent.props.release === '0.9.7') {
-        deferred.reject('This release does not have a CLI installer. Please ' +
-                        'process the installation from your browser');
-      } else {
-        var installScript = finalName + '/install/index_cli.php';
-        var args = ' --domain=' + parent.props.storeDomain + 
-          ' --db_server=' + parent.props.dbServer +
-          ' --db_user=' + parent.props.dbUser +
-          ' --db_password=' + parent.props.dbPassword +
-          ' --db_name=' + parent.props.dbName +
-          ' --db_clear=' + Number(parent.props.dbClear).toString() +
-          ' --prefix=' + parent.props.dbPrefix +
-          ' --engine=' + parent.props.dbEngine +
-          ' --name=' + parent.props.storeName +
-          ' --password=' + parent.props.boPassword +
-          ' --email=' + parent.props.boEmail +
-          ' --newsletter=0';
-        exec('php -d memory_limit=256M ' + installScript + args, deferred.makeNodeResolver());
-      }
+        console.log(chalk.red('This release does not have a CLI installer. Please ' +
+                        'process the installation from your browser'));
+        deferred.reject('No CLI installer found');
+        return deferred.promise;
+      } 
+
+      var installScript = finalName + '/install/index_cli.php';
+      var args = 
+        ' --domain=' + parent.props.storeDomain + 
+        ' --db_server=' + parent.props.dbServer +
+        ' --db_user=' + parent.props.dbUser +
+        ' --db_password=' + parent.props.dbPassword +
+        ' --db_name=' + parent.props.dbName +
+        ' --db_clear=' + Number(parent.props.dbClear).toString() +
+        ' --prefix=' + parent.props.dbPrefix +
+        ' --engine=' + parent.props.dbEngine +
+        ' --name=' + parent.props.storeName +
+        ' --password=' + parent.props.boPassword +
+        ' --email=' + parent.props.boEmail +
+        ' --newsletter=0';
+      exec('php -d memory_limit=256M ' + installScript + args, deferred.makeNodeResolver());
       return deferred.promise;
     }
 
     function fixPhysicalUri () {
-      console.log('Put the physical uri in database...');
       var deferred = Q.defer();
       var physicalUri = '/prestashop_' + parent.props.release + '/';
       var updateQuery = 'UPDATE ' + parent.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1';
@@ -374,6 +404,7 @@ module.exports = yeoman.Base.extend({
     .then(extract)
     .then(renameFolder)
     .then(removeZip)
+    .then(DBcheck)
     .then(installPrestaShop)
     .then(fixPhysicalUri)
     .then(deleteInstallDir)
