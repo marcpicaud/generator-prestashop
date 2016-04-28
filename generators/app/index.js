@@ -286,14 +286,12 @@ module.exports = yeoman.Base.extend({
 
     function renameFolder () {
       var deferred = Q.defer();
-      console.log('Cleanup everything...');
       fs.rename(extractDestination + '/prestashop', finalName, deferred.makeNodeResolver());
       return deferred.promise;
     }
 
     function removeZip () {
       var deferred = Q.defer();
-      console.log('Removing zip...');
       exec('rm -r ' + extractDestination, deferred.makeNodeResolver());
       return deferred.promise;
     }
@@ -372,14 +370,12 @@ module.exports = yeoman.Base.extend({
 
     function deleteInstallDir () {
       var deferred = Q.defer();
-      console.log('Deleting the install directory...');
       exec('rm -r ' + finalName + '/install', deferred.makeNodeResolver());
       return deferred.promise;
     }
 
     function renameAdminDir () {
       var deferred = Q.defer();
-      console.log('Renaming the admin directory...');
       fs.rename(finalName + '/admin', finalName + '/backoffice', deferred.makeNodeResolver());
       return deferred.promise;
     }
