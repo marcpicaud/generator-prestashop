@@ -24,14 +24,6 @@ module.exports = yeoman.Base.extend({
 
     var prompts = [
       {
-        type: 'confirm',
-        name: 'latestStableVersion',
-        message: 'Would you like to grab the latest PrestaShop release?',
-        default: true
-      },
-      {when: function (response) {
-        return !response.latestStableVersion;
-      },
         type: 'list',
         name: 'release',
         message: 'Which one do you want ?',
@@ -236,9 +228,6 @@ module.exports = yeoman.Base.extend({
     ];
 
     this.prompt(prompts, function (props) {
-      if (props.latestStableVersion) {
-        props.release = '1.6.1.5';
-      }
       this.props = props;
       done();
     }.bind(this));
