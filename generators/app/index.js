@@ -275,7 +275,7 @@ module.exports = yeoman.Base.extend({
 
     function renameFolder () {
       var deferred = Q.defer();
-      fs.rename(extractDestination + '/prestashop', finalName, deferred.makeNodeResolver());
+      fs.rename(extractDestination + path.sep + 'prestashop', finalName, deferred.makeNodeResolver());
       return deferred.promise;
     }
 
@@ -323,7 +323,7 @@ module.exports = yeoman.Base.extend({
         return deferred.promise;
       } 
 
-      var installScript = finalName + '/install/index_cli.php';
+      var installScript = finalName + path.sep + 'install'+ path.sep + 'index_cli.php';
       var args = 
         ' --domain=' + parent.props.storeDomain + 
         ' --db_server=' + parent.props.dbServer +
@@ -343,7 +343,7 @@ module.exports = yeoman.Base.extend({
 
     function fixPhysicalUri () {
       var deferred = Q.defer();
-      var physicalUri = '/prestashop_' + parent.props.release + '/';
+      var physicalUri = path.sep + 'prestashop_' + parent.props.release + path.sep;
       var updateQuery = 'UPDATE ' + parent.props.dbPrefix + 'shop_url SET physical_uri=\'' + physicalUri + '\' WHERE id_shop=1';
       var connection = mysql.createConnection({
         host: parent.props.dbServer,
@@ -359,13 +359,13 @@ module.exports = yeoman.Base.extend({
 
     function deleteInstallDir () {
       var deferred = Q.defer();
-      exec('rm -r ' + finalName + '/install', deferred.makeNodeResolver());
+      exec('rm -r ' + finalName + path.sep + 'install', deferred.makeNodeResolver());
       return deferred.promise;
     }
 
     function renameAdminDir () {
       var deferred = Q.defer();
-      fs.rename(finalName + '/admin', finalName + '/backoffice', deferred.makeNodeResolver());
+      fs.rename(finalName + path.sep + 'admin', finalName + path.sep + 'backoffice', deferred.makeNodeResolver());
       return deferred.promise;
     }
 
