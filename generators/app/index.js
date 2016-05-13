@@ -26,7 +26,7 @@ module.exports = yeoman.Base.extend({
       {
         type: 'list',
         name: 'release',
-        message: 'Which one do you want ?',
+        message: 'Which version do you want ?',
         // I'm fucking lost in callbacks hell when trying to build this array
         // programmatically
         choices: [
