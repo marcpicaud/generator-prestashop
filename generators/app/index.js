@@ -32,6 +32,7 @@ module.exports = yeoman.Base.extend({
         choices: [
           '1.7.0.0-alpha.4.0',
           '1.7.0.0-alpha.3.0',
+          '1.6.1.5',
           '1.6.1.4',
           '1.6.1.3',
           '1.6.1.3-rc1',
@@ -228,6 +229,9 @@ module.exports = yeoman.Base.extend({
     ];
 
     this.prompt(prompts, function (props) {
+      if (props.latestStableVersion) {
+        props.release = '1.6.1.6';
+      }
       this.props = props;
       done();
     }.bind(this));
